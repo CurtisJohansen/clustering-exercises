@@ -10,15 +10,19 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
+plt.rc('figure', figsize=(11, 9))
+plt.rc('font', size=13)
 import scipy.stats as stats
+
+# import splitting and imputing functions
+
+from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+import sklearn.preprocessing
 
 # Import to obtain data from Codeup SQL databse server
 
 from env import host, user, password
-
-# Library dealing with NA values
-
-from sklearn.impute import SimpleImputer
 
 # connection url
 
@@ -37,32 +41,32 @@ def get_zillow_data():
     a csv file if a local file does not exist, and returns a df.
     '''
     sql_query = """
-SELECT prop.*,
-       pred.logerror,
-       pred.transactiondate,
-       air.airconditioningdesc,
-       arch.architecturalstyledesc,
-       build.buildingclassdesc,
-       heat.heatingorsystemdesc,
-       landuse.propertylandusedesc,
-       story.storydesc,
-       construct.typeconstructiondesc
-FROM   properties_2017 prop
-       INNER JOIN (SELECT parcelid,
-                   Max(transactiondate) transactiondate
-                   FROM   predictions_2017
-                   GROUP  BY parcelid) pred
-               USING (parcelid)
-               			JOIN predictions_2017 as pred USING (parcelid, transactiondate)
-       LEFT JOIN airconditioningtype air USING (airconditioningtypeid)
-       LEFT JOIN architecturalstyletype arch USING (architecturalstyletypeid)
-       LEFT JOIN buildingclasstype build USING (buildingclasstypeid)
-       LEFT JOIN heatingorsystemtype heat USING (heatingorsystemtypeid)
-       LEFT JOIN propertylandusetype landuse USING (propertylandusetypeid)
-       LEFT JOIN storytype story USING (storytypeid)
-       LEFT JOIN typeconstructiontype construct USING (typeconstructiontypeid)
-WHERE  prop.latitude IS NOT NULL
-       AND prop.longitude IS NOT NULL
+    SELECT prop.*,
+           pred.logerror,
+           pred.transactiondate,
+           air.airconditioningdesc,
+           arch.architecturalstyledesc,
+           build.buildingclassdesc,
+           heat.heatingorsystemdesc,
+           landuse.propertylandusedesc,
+           story.storydesc,
+           construct.typeconstructiondesc
+    FROM   properties_2017 prop
+           INNER JOIN (SELECT parcelid,
+                       Max(transactiondate) transactiondate
+                       FROM   predictions_2017
+                       GROUP  BY parcelid) pred
+                   USING (parcelid)
+                            JOIN predictions_2017 as pred USING (parcelid, transactiondate)
+           LEFT JOIN airconditioningtype air USING (airconditioningtypeid)
+           LEFT JOIN architecturalstyletype arch USING (architecturalstyletypeid)
+           LEFT JOIN buildingclasstype build USING (buildingclasstypeid)
+           LEFT JOIN heatingorsystemtype heat USING (heatingorsystemtypeid)
+           LEFT JOIN propertylandusetype landuse USING (propertylandusetypeid)
+           LEFT JOIN storytype story USING (storytypeid)
+           LEFT JOIN typeconstructiontype construct USING (typeconstructiontypeid)
+    WHERE  prop.latitude IS NOT NULL
+           AND prop.longitude IS NOT NULL
                 """
     if os.path.isfile('zillow_data.csv'):
         
